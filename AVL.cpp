@@ -1,4 +1,5 @@
 #include<iostream>
+#include<string>
 using namespace std;
 
 
@@ -34,62 +35,76 @@ void node::rotate(node *li_node){
 				int data = (*copy)->data;
 				(*copy)->data = (*copy)->left->data;
 				(*copy)->left->data = data;
-				// if((*copy)->left->right!=NULL){
-				// 	if((*copy)->right!=NULL ){
-				// 		(*copy)->right->left = (*copy)->left->right;
-				// 		(*copy)->right->left->parent = (*copy)->right;
-				// 		(*copy)->right->lh = (*copy)->left->right->rh+1;
-				// 		(*copy)->left->right = (*copy)->right;
-				// 		(*copy)->left->rh = (*copy)->right->rh+1;
-				// 		(*copy)->left->right->parent = (*copy)->left;
-				// 		(*copy)->left->left = NULL;
-				// 		cout<<" ,";
-				// 	}
-				// 	else{
-				// 		(*copy)->left->left = (*copy)->left->right;
-				// 		(*copy)->left->left->parent = (*copy)->left;
-				// 		(*copy)->left->lh = (*copy)->left->right->rh;
-				// 		cout<<" ,,";
-				// 	}	
-				// 	//do cal
-				// 	//(*copy)->left->bf = (*copy)->left->-(*copy)->right->rh;
-				// // 	//(*copy)->right = (**copy1)->left;
-				// }
-				// else{
-				// 	if((*copy)->right!=NULL ){
-				// 		(*copy)->left->right = (*copy)->right;
-				// 		(*copy)->left->rh = (*copy)->right->rh+1;
-				// 		(*copy)->left->right->parent = (*copy)->left;
-				// 		(*copy)->left->left = NULL;
-				// 		cout<<" ;;";
-				// 	}
-				// 	else{
-				// 		cout<<" ,";
+				cout<<&(*copy)->left->left<<" \n";
+				cout<<(*copy)->left->left->data<<" \n";
+				cout<<(*copy1)->data<<" \n";
+				cout<<&(*copy1)<<" \n";
+			 	if((*copy)->right!=NULL){
+					if((*copy)->left->right!=NULL){
+						//add (*copy)->right as right child of (*copy)->left and 
+						//(*copy)->left->right as left child of (*copy)->left
+						(*copy)->left->left = (*copy)->left->right;
+						(*copy)->left->lh = (*copy)->left->left->rh+1;
+						(*copy)->left->left->type = false;
+						//(*copy)->left->left is added, now right element
+						(*copy)->left->right = (*copy)->right;
+						(*copy)->left->right->parent = (*copy)->left;
+						(*copy)->left->rh = (*copy)->left->right->rh+1;
+						(*copy)->left->bf = (*copy)->left->lh-(*copy)->left->rh;
+					}
+					else{
+						//adding the (*copy)->right for the (*copy)->left->right
+						(*copy)->left->right = (*copy)->right;
+						(*copy)->left->right->parent = (*copy)->left;
+						(*copy)->left->rh = (*copy)->left->right->rh+1;
+						(*copy)->left->lh = 0;
+						(*copy)->left->bf = -(*copy)->left->rh;
+
+						//adding (*copy)->left to (*copy)->right
 						(*copy)->right = (*copy)->left;
-				 		(*copy)->right->type = true;
-				 		(*copy)->left = (*copy)->left->left;
-			     		(*copy)->left->parent = (*copy);
-						(*copy)->left->left = NULL;
-				// 		(*copy)->left->left = NULL;
-				// 		//(*copy)->left->left = NULL;
-				// 	}
-				// }
+						(*copy)->right->type = true;
+						(*copy)->rh = (*copy)->right->rh+1;
+
+						//adding (*copy)->left->left to (*copy)->left
+						(*copy)->left = (*copy)->left->left;
+						(*copy)->left->parent = (*copy);
+						(*copy)->lh = (*copy)->left->lh+1;
+
+						//remvoing (*copy)->left->left from (*copy)->right->left
+						(*copy)->right->left = NULL;
+						
+						//updating the root BF
+						(*copy)->bf = (*copy)->lh-(*copy)->rh;
+					}
+				}
+				else{
+					//adding the right tree from the left element of root
+					(*copy)->right = (*copy)->left;
+					(*copy)->right->type = true;
+					(*copy)->rh = (*copy)->right->rh+1;
+					(*copy)->right->bf = -(*copy)->right->rh;
+
+					//post adding the right node for the root
+					(*copy)->right->lh = 0;
+
+					//adding the left tree from the left left element of root
+					(*copy)->left = (*copy)->left->left;
+					(*copy)->left->parent = (*copy);
+					(*copy)->lh = (*copy)->left->lh+1;
+					
+					//removing left left node of root node, came along to root right left node
+					(*copy)->right->left = NULL;
+
+					//updating the BF.
+					(*copy)->bf = (*copy)->lh-(*copy)->rh;
+				}
+				//just RR for the three node tree with bf of root:2
 				
-				// 		(*copy)->right->left = (**copy1)->left->right;
-				// 		(*copy)->left->right->left->type = false;
-				// 		(*copy)->left->right->lh = (**copy1)->left->right->rh+1;
-				// 		(*copy)->left->right->left->parent = (*copy)->left->right;
-				// }
+				//(*copy)->right->rh = 0;
+				//(*copy)->right->lh = 0;
+				//(*copy)->right->bf = 0;
+				//(*copy)->left = *copy1;
 				
-				// // else{
-				// // 	(*copy)->left->left = NULL;
-				// // }
-			   
-			
-			 	// (*copy)->rh = (*copy)->right->rh+1;
-	            // (*copy)->lh = (*copy)->left->lh+1;
-				// (*copy)->bf = (*copy)->lh-(*copy)->rh;
-				// (*copy)->right->bf = (*copy)->left->lh-(*copy)->right->rh;
 				
 			}
 			if((*copy)->parent!=NULL){
@@ -240,8 +255,8 @@ node *root = NULL;
 root->insert(9,&root);
 root->insert(7,&root);
 root->insert(4,&root);
-//root->insert(3,&root);
-//root->insert(5,&root);
+root->insert(3,&root);
+root->insert(2,&root);
 //root->insert(2,&root);
 //root->insert(2,&root);
 //root->insert(10,&root);
@@ -257,8 +272,5 @@ root->checkBalance(root);
 //root->addheight2(root->left);
 
 
-
-
- 
  return 0;
 }
