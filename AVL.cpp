@@ -32,15 +32,17 @@ void node::rotate(node *li_node){
 			if((*copy)->parent==NULL){
 				cout<<"RR for root\n";
 				node **copy1 = &(*copy)->left->left;
-				int data = (*copy)->data;
-				(*copy)->data = (*copy)->left->data;
-				(*copy)->left->data = data;
 			 	if((*copy)->right!=NULL){
 					if((*copy)->left->right!=NULL){
 						//Two cases exist in the if conditon; case1 and LR Rotation..
 						//case1: case for root node rotation with (*copy)->left->right not being empty
 						if((*copy)->left->lh >=(*copy)->left->rh){
 							cout<<"RR for root \n";
+
+							int data = (*copy)->data;
+							(*copy)->data = (*copy)->left->data;
+							(*copy)->left->data = data;
+
 							//adding the (*copy)->left->right to (*copy)->left->left 
 							(*copy)->parent = (*copy)->left->left;
 							(*copy)->left->left = (*copy)->left->right;
@@ -65,13 +67,82 @@ void node::rotate(node *li_node){
 							(*copy)->left->parent = (*copy);
                             (*copy)->lh = (*copy)->left->lh+1;
 							(*copy)->bf = (*copy)->lh - (*copy)->rh;
+							addheight((*copy)->left->left);
 							checkBalance(*copy);
+							rotate((*copy)->left->left);
 						}
 						else{
-							cout<<" LR Rotation \n";
+							//LR Rotation for Root element 
+							//case 1: (*copy)->left->right->left==NULL
+							//case 2: (*copy)->left->right->left!=NULL
+
+							if((*copy)->left->right->left==NULL){
+									cout<<" LR Rotation for root element \n";
+									node *new_node = new node((*copy)->left->data);
+								 	if ((*copy)->left->left!=NULL){
+											(*copy)->parent = (*copy)->left->left;
+											new_node->left = (*copy)->parent;
+											new_node->left->parent = new_node;
+											new_node->lh = new_node->left->lh+1;
+											(*copy)->parent = NULL;
+									}
+
+									(*copy)->left->right->left = new_node;
+									(*copy)->left->right->left->type = false;
+									(*copy)->left->right->left->parent = (*copy)->left->right;
+									(*copy)->left->right->lh = (*copy)->left->right->left->lh+1;
+
+									(*copy)->left = (*copy)->left->right;
+									(*copy)->left->parent = (*copy);
+									(*copy)->left->type = false;
+									(*copy)->lh = (*copy)->left->lh+1;
+
+									addheight(new_node->left!=NULL?new_node->left:new_node);
+									rotate(new_node->left!=NULL?new_node->left:new_node);
+							}
+							else{
+								//case 2
+								(*copy)->parent = (*copy)->left->right->left;
+
+								cout<<" LR Rotation for root element \n";
+
+								node **temp = &(*copy)->left->right;
+
+								//creating a new (*copy)->left node
+								node *n_node = new node((*copy)->left->data);
+								n_node->left = (*copy)->left->left;
+								n_node->left->parent = n_node;
+								n_node->lh = n_node->left->lh+1;
+
+								(*temp)->left = n_node;
+								(*temp)->left->parent = (*temp);
+								(*temp)->lh = (*temp)->left->lh+1;
+
+								(*temp)->left->right = (*copy)->parent;
+								(*temp)->left->right->parent = (*temp)->left;
+								(*temp)->left->rh = (*temp)->left->right->rh+1;
+
+								(*copy)->left = *temp;
+								(*copy)->left->parent = (*copy);
+								(*copy)->parent = NULL;
+								(*copy)->lh = (*copy)->left->lh+1;
+
+								checkBalance(*copy);
+								addheight(n_node->right);
+								rotate(n_node->right);
+								
+								
+
+							}
+
+
 						}
 					}
 					else{
+						int data = (*copy)->data;
+						(*copy)->data = (*copy)->left->data;
+						(*copy)->left->data = data;
+
 						//adding the (*copy)->right for the (*copy)->left->right
 						(*copy)->left->right = (*copy)->right;
 						(*copy)->left->right->parent = (*copy)->left;
@@ -99,6 +170,10 @@ void node::rotate(node *li_node){
 					}
 				}
 				else{
+
+					int data = (*copy)->data;
+					(*copy)->data = (*copy)->left->data;
+					(*copy)->left->data = data;
 					//adding the right tree from the left element of root
 					(*copy)->right = (*copy)->left;
 					(*copy)->right->type = true;
@@ -143,6 +218,7 @@ void node::rotate(node *li_node){
 						(*copy)->bf = (*copy)->lh-(*copy)->rh;
 
 						addheight(*copy);
+			
 					}
 					else{
 						(*copy)->left->right = (*copy);
@@ -157,6 +233,63 @@ void node::rotate(node *li_node){
 				else{
 					//(*copy)->left->rh is greater than (*copy)->left->lh, So it is a LR rotation
 					cout<<"LR Rotation for non-root element \n";
+
+						if((*copy)->left->right->left==NULL){
+									node *new_node = new node((*copy)->left->data);
+								 	if ((*copy)->left->left!=NULL){
+											new_node->left = (*copy)->left->left;
+											new_node->left->parent = new_node;
+											new_node->lh = new_node->left->lh+1;
+									}
+
+									(*copy)->left->right->left = new_node;
+									(*copy)->left->right->left->type = false;
+									(*copy)->left->right->left->parent = (*copy)->left->right;
+									(*copy)->left->right->lh = (*copy)->left->right->left->lh+1;
+
+									(*copy)->left = (*copy)->left->right;
+									(*copy)->left->parent = (*copy);
+									(*copy)->left->type = false;
+									(*copy)->lh = (*copy)->left->lh+1;
+
+									addheight(new_node->left!=NULL?new_node->left:new_node);
+									rotate(new_node->left!=NULL?new_node->left:new_node);
+							}
+							else{
+								//case 2
+								node **child = &(*copy)->left->right->left;
+								node **temp = &(*copy)->left->right;
+
+								cout<<"LR Rotation for non-root element \n";
+
+								//creating a new (*copy)->left node
+								node *n_node = new node((*copy)->left->data);
+								if ((*copy)->left->left!=NULL){
+									n_node->left = (*copy)->left->left;
+									n_node->left->parent = n_node;
+									n_node->lh = n_node->left->lh+1;
+								}
+
+								(*temp)->left = n_node;
+								(*temp)->left->parent = (*temp);
+								(*temp)->lh = (*temp)->left->lh+1;
+
+								(*temp)->left->right = (*child);
+								(*temp)->left->right->parent = (*temp)->left;
+								(*temp)->left->rh = (*temp)->left->right->rh+1;
+
+								(*copy)->left = *temp;
+								(*copy)->left->parent = (*copy);
+								(*copy)->lh = (*copy)->left->lh+1;
+
+								checkBalance(*copy);
+								addheight(n_node->right);
+								rotate(n_node->right);
+								
+								
+
+							}
+
 				}
 			    //checkBalance((*copy)->parent);
 			}	
@@ -179,29 +312,36 @@ void node::rotate(node *li_node){
 						//case1: case for root node rotation with (*copy)->left->right not being empty
 						if((*copy)->right->rh >=(*copy)->right->lh){
 							cout<<"LL for root \n";
-							//copying the address of (*copy)->right->right in (*copy)->parent
+
+							//copying the address of (*copy)->right->right in (*copy)->parent, for future purpose 
 							(*copy)->parent = (*copy)->right->right;
 
 							//adding (*copy) as left child of (*copy)->right->left
 							//creating a replica of (*copy) to add to left child of (*copy)->right->left
 							node *new_node = new node(data);
 							new_node->left = (*copy)->left;
+							new_node->left->parent = new_node;
 							new_node->lh = new_node->left->lh+1;
 
 							node **temp = &(*copy)->right->left;
+							node **temp1 = &(*copy)->right->left;
 
 							while((*temp)->left!=NULL){
-								(*temp) = (*temp)->left;
+								temp = &(*temp)->left;
 							}
-							//cout<<(*temp)->data<<" nnnnn \n";
+
+  
 							(*temp)->left = new_node;
 							new_node->parent = (*temp);
 							new_node->type = false;
 							(*temp)->lh = new_node->lh+1;
+							checkBalance((*copy)->right->left);
+						
 
-							//cout<<" nnn \n";
 							//adding the right and left subtree to the root
 							(*copy)->left = (*copy)->right->left;
+							//checkBalance((*copy)->left);
+							cout<< (*copy)->right->left->left->data<<" \n";
 							(*copy)->left->parent = (*copy);
 							(*copy)->lh = (*copy)->right->left->lh>=(*copy)->right->left->rh?(*copy)->right->left->lh+1:(*copy)->right->left->rh+1;
 
@@ -209,11 +349,44 @@ void node::rotate(node *li_node){
 							(*copy)->parent = NULL;
 							(*copy)->right->parent = (*copy);
 							(*copy)->rh = (*copy)->right->rh+1;
-							//addheight(new_node->left);
-							checkBalance(*copy);
+							addheight(new_node->left);
+							rotate(new_node->left);
 						}
 						else{
-							cout<<" RL Rotation \n";
+							//(*copy)->left->lh is greater than (*copy)->left->rh, So it is a RL rotation
+							// cout<<"RL Rotation for root element \n";
+
+							// //temp stores (*copy)->right
+							// node **temp = &(*copy)->right;
+
+							// //creating a node out of (*copy)->right->data;
+							// node *n_node = new node((*temp)->data);
+							// 	if((*temp)->right!=NULL){
+							// 		//adding (*copy)->right->right 
+							// 		n_node->right = (*temp)->right;
+							// 		n_node->rh = n_node->right->rh+1;
+							// 		n_node->right->parent = n_node;
+							// 	}
+							// 	if((*temp)->left->right!=NULL){
+							// 		//adding (*copy)->right->left->right to n_node's left
+							// 		n_node->left = (*temp)->left->right;
+							// 		n_node->left->parent = n_node;
+							// 		n_node->left->type = false;
+							// 		n_node->lh = n_node->left->lh+1;
+							// 	}
+							
+							// //Fixing the create n_node to the (*copy)->right->left->right
+							// (*temp)->right = n_node;
+							// (*temp)->right->parent = *temp;
+							// (*temp)->right->type = true;
+							// (*temp)->rh = (*temp)->right->rh+1;
+
+							// //adding the (*temp) to right (*copy)->right
+							// (*copy)->right = *temp;
+							// (*copy)->right->parent = (*copy);
+
+							// addheight(n_node);
+							// rotate(n_node);
 						}
 					}
 					else{
@@ -279,7 +452,16 @@ void node::rotate(node *li_node){
 						//adding (*copy) below (*copy)->right->left
 						insert((*copy)->data,&(*copy)->right);
 						if((*copy)->left!=NULL){
-							insert((*copy)->left->data,&(*copy)->right);
+							node **temp = &(*copy)->right->left;
+							while((*temp)->left!=NULL){
+								temp = &(*temp)->left;
+							}
+							(*temp)->left = (*copy)->left;
+							(*temp)->left->parent = (*temp);
+							(*temp)->lh = (*temp)->left->lh+1;
+							addheight((*temp)->left);
+							rotate((*temp)->left);
+							//insert((*copy)->left->data,&(*copy)->right);
 						}
 						//insert will manage to add (*copy)
 					}
@@ -296,8 +478,41 @@ void node::rotate(node *li_node){
 					}
 				}
 				else{
-					//(*copy)->left->rh is greater than (*copy)->left->lh, So it is a LR rotation
-					cout<<"RL Rotation for non-root element \n";
+							//(*copy)->left->lh is greater than (*copy)->left->rh, So it is a RL rotation
+							cout<<"RL Rotation for non-root element \n";
+
+							//temp stores (*copy)->right
+							node **temp = &(*copy)->right;
+
+							//creating a node out of (*copy)->right->data;
+							node *n_node = new node((*temp)->data);
+								if((*temp)->right!=NULL){
+									//adding (*copy)->right->right 
+									n_node->right = (*temp)->right;
+									n_node->rh = n_node->right->rh+1;
+									n_node->right->parent = n_node;
+								}
+								if((*temp)->left->right!=NULL){
+									//adding (*copy)->right->left->right to n_node's left
+									n_node->left = (*temp)->left->right;
+									n_node->left->parent = n_node;
+									n_node->left->type = false;
+									n_node->lh = n_node->left->lh+1;
+								}
+							
+							//Fixing the create n_node to the (*copy)->right->left->right
+							(*temp)->right = n_node;
+							(*temp)->right->parent = *temp;
+							(*temp)->right->type = true;
+							(*temp)->rh = (*temp)->right->rh+1;
+
+							//adding the (*temp) to right (*copy)->right
+							(*copy)->right = *temp;
+							(*copy)->right->parent = (*copy);
+
+							addheight(n_node);
+							rotate(n_node);
+
 				}
 			    //checkBalance((*copy)->parent);
 			}	
@@ -435,28 +650,53 @@ void node::checkBalance(node *root){
 
 int main(){
 
+
 node *root = NULL;
-root->insert(6,&root);
-root->insert(7,&root);
 root->insert(8,&root);
-root->insert(8,&root);
+root->insert(5,&root);
+root->insert(4,&root);
+root->insert(10,&root);
+root->insert(12,&root);
+root->insert(9,&root);
 root->insert(9,&root);
 root->insert(10,&root);
-// root->insert(5,&root);
-// root->insert(11,&root);
+root->insert(11,&root);
+root->insert(12,&root);
+root->insert(11,&root);
+root->insert(11,&root);
+root->insert(4,&root);
+root->insert(3,&root);
+root->insert(3,&root);
+root->insert(1,&root);
+root->insert(4,&root);
+root->insert(3,&root);
+root->insert(3,&root);
+root->insert(1,&root);
 root->checkBalance(root);
-//root->checkBalance(root);
-// root->insert(12,&root);
-//root->checkBalance(root);
-// root->insert(2,&root);
-// root->insert(1,&root);
-// root->insert(1,&root); 
-// root->insert(1,&root);
-// root->insert(1,&root);
-// root->checkBalance(root);
-//root->insert(2,&root);
-//root->insert(10,&root);
-//root->insert(71,&root);
+//root->insert(6,&root);
+
+// root->insert(7,&root);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+root->checkBalance(root);
 //cout<<root->right->right->parent->parent->lh-root->right->right->parent->parent->rh;
 
 //root->addheight(root);
